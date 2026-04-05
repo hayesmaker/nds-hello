@@ -1,54 +1,61 @@
 #include <nds.h>
 #include <stdio.h>
-#include "pikachu_standard.h"
+#include <string.h>
+#include "pikachu_sprite_clean.h"
+
+int spriteX = 96;
+int spriteY = 64;
 
 int main(int argc, char **argv) {
     PrintConsole bottomConsole;
     
-    videoSetMode(MODE_1_2D | DISPLAY_BG2_ACTIVE);
+    videoSetMode(MODE_0_2D | DISPLAY_SPR_ACTIVE);
     videoSetModeSub(MODE_0_2D);
     
-    vramSetBankA(VRAM_A_MAIN_BG);
+    vramSetBankE(VRAM_E_MAIN_SPRITE);
     vramSetBankC(VRAM_C_SUB_BG);
     
-    BGCTRL[2] = BG_TILE_BASE(1) | BG_MAP_BASE(0) | BG_COLOR_256 | BG_RS_64x64;
+    oamInit(&oamMain, SpriteMapping_1D_32, false);
     
-    dmaCopy(pikachu_standardTiles, (void *)CHAR_BASE_BLOCK(1), pikachu_standardTilesLen);
-    dmaCopy(pikachu_standardMap, (void *)SCREEN_BASE_BLOCK(0), pikachu_standardMapLen);
-    dmaCopy(pikachu_standardPal, BG_PALETTE, pikachu_standardPalLen);
-    
-    bgSetCenter(2, 96, 64);
-    bgSetScale(2, 256, 256);
+    u16* spriteGfx = oamAllocateGfx(&oamMain, SpriteSize_64x64, SpriteColorFormat_256Color);
+    memcpy(spriteGfx, pikachu_sprite_cleanTiles, pikachu_sprite_cleanTilesLen);
+    memcpy(SPRITE_PALETTE, pikachu_sprite_cleanPal, pikachu_sprite_cleanPalLen);
     
     consoleInit(&bottomConsole, 0, BgType_Text4bpp, BgSize_T_256x256, 31, 0, false, true);
     
     consoleSelect(&bottomConsole);
-    iprintf("X:0         8        16       24\n");
-    iprintf("0 +---------+--------+--------+\n");
-    iprintf("1 |         |        |        |\n");
-    iprintf("2 |         |        |        |\n");
-    iprintf("3 |         |        |        |\n");
-    iprintf("4 |         |        |        |\n");
-    iprintf("5 |         |        |        |\n");
-    iprintf("6 |         |        |        |\n");
-    iprintf("7 |         |        |        |\n");
-    iprintf("8 +---------+--------+--------+\n");
-    iprintf("9 |         |        |        |\n");
-    iprintf("10|         |        |        |\n");
-    iprintf("11+---------+--------+--------+\n");
-    iprintf("\n");
-    iprintf("Pikachu: centered\n");
-    iprintf("BG2 affine 64x64\n");
-    iprintf("\n");
-    iprintf("Start: Pika pika\n");
+    iprintf("D-PAD: Move sprite\n");
+    iprintf("A: +8  B: -8\n");
+    iprintf("START: Quit\n");
     
     while(1) {
         scanKeys();
-        if (keysDown() & KEY_START) {
-            consoleSelect(&bottomConsole);
-            iprintf("Playing...\n");
-        }
+        int held = keysHeld();
+        
+        if (held & KEY_UP) spriteY -= 2;
+        if (held & KEY_DOWN) spriteY += 2;
+        if (held & KEY_LEFT) spriteX -= 2;
+        if (held & KEY_RIGHT) spriteX += 2;
+        
+        if (keysDown() & KEY_A) spriteX += 8;
+        if (keysDown() & KEY_B) spriteX -= 8;
+        
+        if (spriteX < 0) spriteX = 0;
+        if (spriteY < 0) spriteY = 0;
+        if (spriteX > 256) spriteX = 256;
+        if (spriteY > 192) spriteY = 192;
+        
+        oamSet(&oamMain, 0, spriteX, spriteY, 0, 0, SpriteSize_64x64, SpriteColorFormat_256Color, 
+               spriteGfx, -1, false, false, false, false, false);
+        
+        consoleSelect(&bottomConsole);
+        iprintf("\x1b[3;0H");
+        iprintf("X:%d Y:%d    \n", spriteX, spriteY);
+        
+        if (keysDown() & KEY_START) break;
+        
         swiWaitForVBlank();
+        oamUpdate(&oamMain);
     }
     
     return 0;
