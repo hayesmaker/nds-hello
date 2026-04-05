@@ -3,8 +3,30 @@
 #include <string.h>
 #include "pikachu_sprite_clean.h"
 
+extern const short pika_audio[44100];
+#define PIKA_SAMPLES 44100
+#define PIKA_FREQ 22050
+
 int spriteX = 96;
 int spriteY = 64;
+int playing = 0;
+int soundId = -1;
+
+void playSound() {
+    if (soundId >= 0) {
+        soundKill(soundId);
+        soundId = -1;
+    }
+    soundEnable();
+    soundId = soundPlaySample(pika_audio, SoundFormat_16Bit, PIKA_SAMPLES * 2, PIKA_FREQ, 100, 64, false, 0);
+}
+
+void stopSound() {
+    if (soundId >= 0) {
+        soundKill(soundId);
+        soundId = -1;
+    }
+}
 
 int main(int argc, char **argv) {
     PrintConsole bottomConsole;
@@ -26,7 +48,7 @@ int main(int argc, char **argv) {
     consoleSelect(&bottomConsole);
     iprintf("D-PAD: Move sprite\n");
     iprintf("A: +8  B: -8\n");
-    iprintf("START: Quit\n");
+    iprintf("Start : Pika pika\n");
     
     while(1) {
         scanKeys();
@@ -48,15 +70,30 @@ int main(int argc, char **argv) {
         oamSet(&oamMain, 0, spriteX, spriteY, 0, 0, SpriteSize_64x64, SpriteColorFormat_256Color, 
                spriteGfx, -1, false, false, false, false, false);
         
+        if (keysDown() & KEY_START) {
+            playing = !playing;
+            consoleSelect(&bottomConsole);
+            if (playing) {
+                playSound();
+                iprintf("\x1b[5;0H");
+                iprintf("Playing sound...    \n");
+            } else {
+                stopSound();
+                iprintf("\x1b[5;0H");
+                iprintf("                    \n");
+            }
+        }
+        
         consoleSelect(&bottomConsole);
         iprintf("\x1b[3;0H");
         iprintf("X:%d Y:%d    \n", spriteX, spriteY);
         
-        if (keysDown() & KEY_START) break;
+        if (keysDown() & KEY_SELECT) break;
         
         swiWaitForVBlank();
         oamUpdate(&oamMain);
     }
     
+    soundDisable();
     return 0;
 }
