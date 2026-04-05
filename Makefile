@@ -99,14 +99,14 @@ export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #---------------------------------------------------------------------------------
 
 $(BUILD):
-@[ -d $@ ] || mkdir -p $@
-@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 
 clean:
-@echo clean ...
-@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).ds.gba
+	@echo clean ...
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).ds.gba
 
 #---------------------------------------------------------------------------------
 
@@ -127,8 +127,8 @@ $(OUTPUT).elf : $(OFILES)
 %.o : %.bin
 #---------------------------------------------------------------------------------
 
-@echo $(notdir $<)
-$(bin2o)
+	@echo $(notdir $<)
+	$(bin2o)
 
 -include $(DEPENDS)
 
