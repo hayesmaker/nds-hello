@@ -30,7 +30,7 @@ nds-hello/
    ```bash
    export DEVKITPRO=/opt/devkitpro
    export DEVKITARM=$DEVKITPRO/devkitARM
-   export PATH=$DEVKITPRO/tools/bin:$PATH
+   export PATH=$DEVKITPRO/devkitARM/bin:$DEVKITPRO/tools/bin:$PATH
    ```
 
 3. **Build the project**:

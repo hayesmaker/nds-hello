@@ -76,7 +76,7 @@ Add this line at the end:
 ```bash
 export DEVKITPRO=/opt/devkitpro
 export DEVKITARM=$DEVKITPRO/devkitARM
-export PATH=$DEVKITPRO/tools/bin:$PATH
+export PATH=$DEVKITPRO/devkitARM/bin:$DEVKITPRO/tools/bin:$PATH
 ```
 
 Save and exit (Ctrl+O, Enter, Ctrl+X).
@@ -362,7 +362,7 @@ Or add to current session:
 ```bash
 export DEVKITPRO=/opt/devkitpro
 export DEVKITARM=$DEVKITPRO/devkitARM
-export PATH=$DEVKITPRO/tools/bin:$PATH
+export PATH=$DEVKITPRO/devkitARM/bin:$DEVKITPRO/tools/bin:$PATH
 ```
 
 ### "arm-none-eabi-gcc: command not found"
